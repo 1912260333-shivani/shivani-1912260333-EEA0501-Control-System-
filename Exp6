@@ -1,0 +1,142 @@
+clc;
+clear;
+mode(0);
+
+// Controller parameters
+Kp = 4;       // Proportional gain
+Ki1 = 2;      // Integral gain
+Td = 0.8;     // Derivative time
+Ti = 2;       // Integral time
+Ki2 = Kp/Ti;
+
+s = %s;
+
+// =====================================
+// FOUR TYPES OF DAMPING SYSTEMS
+// =====================================
+
+t = 0:0.1:10;
+num = 36;
+
+// Undamped system
+z = 0;
+den = s^2 + 2*z*s + 36;
+TF = syslin('c', num, den);
+
+scf(0);
+clf();
+
+subplot(221);
+y1 = csim('step', t, TF);
+plot(t, y1);
+xlabel('Time (sec)');
+ylabel('System response c(t)');
+title('Undamped system');
+
+// Underdamped system
+z = 0.5;
+den = s^2 + 2*z*s + 36;
+TF = syslin('c', num, den);
+
+subplot(222);
+y2 = csim('step', t, TF);
+plot(t, y2);
+xlabel('Time (sec)');
+ylabel('System response c(t)');
+title('Underdamped system');
+
+// Critically damped system
+z = 1;
+den = s^2 + 2*z*s + 36;
+TF = syslin('c', num, den);
+
+subplot(223);
+y3 = csim('step', t, TF);
+plot(t, y3);
+xlabel('Time (sec)');
+ylabel('System response c(t)');
+title('Critically damped system');
+
+// Overdamped system
+z = 10;
+den = s^2 + 2*z*s + 36;
+TF = syslin('c', num, den);
+
+subplot(224);
+y4 = csim('step', t, TF);
+plot(t, y4);
+xlabel('Time (sec)');
+ylabel('System response c(t)');
+title('Overdamped system');
+
+// =====================================
+// P, I, PI, PD AND PID CONTROLLERS
+// =====================================
+
+Gi = syslin('c', Ki1/s);
+
+t = 0:0.05:3;
+ramp = t;
+
+// Proportional controller
+p1 = Kp*ones(1, length(t));
+p2 = Kp*t;
+
+// Integral controller
+i1 = csim('step', t, Gi);
+i2 = csim(ramp, t, Gi);
+
+// Change of gain
+i1 = matrix(i1, 1, length(t));
+i2 = matrix(i2, 1, length(t));
+
+i1 = i1*Ki2/Ki1;
+i2 = i2*Ki2/Ki1;
+
+// Derivative controller
+pd1 = p1;
+pd2 = p2 + Kp*Td*ones(1, length(t));
+
+// Open second graph window
+scf(1);
+clf();
+
+// P Controller
+subplot(321);
+plot2d(t, p1, style=2);
+plot2d(t, p2, style=3);
+xtitle('Proportional control', 'Time', 'Output');
+legend('Step input', 'Ramp input');
+xgrid();
+
+// I Controller
+subplot(322);
+plot2d(t, i1, style=2);
+plot2d(t, i2, style=3);
+xtitle('Integral control', 'Time', 'Output');
+legend('Step input', 'Ramp input');
+xgrid();
+
+// PI Controller
+subplot(323);
+plot2d(t, p1+i1, style=2);
+plot2d(t, p2+i2, style=3);
+xtitle('Proportional Integral control', 'Time', 'Output');
+legend('Step input', 'Ramp input');
+xgrid();
+
+// PD Controller
+subplot(324);
+plot2d(t, pd1, style=2);
+plot2d(t, pd2, style=3);
+xtitle('Proportional Derivative control', 'Time', 'Output');
+legend('Step input', 'Ramp input');
+xgrid();
+
+// PID Controller
+subplot(325);
+plot2d(t, pd1+i1, style=2);
+plot2d(t, pd2+i2, style=3);
+xtitle('PID control', 'Time', 'Output');
+legend('Step input', 'Ramp input');
+xgrid();
