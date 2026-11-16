@@ -1,0 +1,59 @@
+clc;
+clear;
+mode(0);
+
+// Given values
+Mp = 0.2;
+tp = 1;
+J = 1;
+B = 1;
+
+// Calculate damping ratio
+a = %pi^2 + (log(1/Mp))^2;
+b = 0;
+c = -(log(1/Mp))^2;
+
+p = poly([c b a], "x", "coeff");
+disp(p, "The obtained equation:");
+
+r = roots(p);
+disp(r, "Roots:");
+
+zeta = abs(r(1));
+disp(zeta, "Zeta =");
+
+// Damped frequency
+wd = %pi/tp;
+disp(wd, "Damped frequency wd =");
+
+// Natural frequency
+wn = wd/sqrt(1-zeta^2);
+disp(wn, "Natural frequency wn =");
+
+// Stiffness constant
+K = J*wn^2;
+disp(K, "K =");
+
+// Damping constant
+Kh = (2*sqrt(K*J)*zeta-B)/K;
+disp(Kh, "Kh =");
+
+// Sigma
+sigma = wn*zeta;
+disp(sigma, "Sigma =");
+
+// Beta
+beta = atan(wd/sigma);
+disp(beta, "Beta =");
+
+// Rise time
+tr = (%pi-beta)/wd;
+disp(tr, "Rise time tr =");
+
+// Settling time (2%)
+ts_2percent = 4/sigma;
+disp(ts_2percent, "Settling time for 2% error =");
+
+// Settling time (5%)
+ts_5percent = 3/sigma;
+disp(ts_5percent, "Settling time for 5% error =");
